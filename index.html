@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Habitudes</title>
+<meta name="theme-color" content="#2f6fed">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Habitudes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<style>
+:root{
+  --bg:#f6f5f1; --card:#ffffff; --ink:#1f2328; --muted:#6b7280; --line:#e4e2db; --accent:#2f6fed;
+  --ok:#1f9d55; --faded:#b7b5ad; --bad:#d33a3a; --warn:#d98200;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#16171a; --card:#202226; --ink:#e8e8e6; --muted:#9a9ca3; --line:#33353b; --accent:#6c9bff; --ok:#3ecf7a; --faded:#55575e; --bad:#ff6b6b; --warn:#ffb347; }
+}
+*{box-sizing:border-box}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.app{display:grid;grid-template-columns:290px 1fr;gap:20px;max-width:1180px;margin:0 auto;padding:24px;align-items:start}
+@media (max-width:860px){.app{grid-template-columns:minmax(0,1fr)}}
+.col{display:flex;flex-direction:column;gap:20px;min-width:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+h1{font-size:18px;margin:0 0 12px}
+h2{font-size:16px;margin:0}
+h3{font-size:14px;margin:0 0 8px}
+button{font:inherit;color:inherit;background:transparent;border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
+button:hover{border-color:var(--accent)}
+button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+button.danger:hover{border-color:var(--bad);color:var(--bad)}
+button.mini{padding:3px 9px;font-size:13px}
+.lnk{cursor:pointer;font-weight:600}
+.lnk:hover{color:var(--accent)}
+.habit{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;border:1px solid transparent;cursor:pointer}
+.habit:hover{background:var(--bg)}
+.habit.sel{border-color:var(--accent);background:var(--bg)}
+.habit.arch{opacity:.6}
+.dot{width:12px;height:12px;border-radius:50%;flex:none;display:inline-block}
+.habit .name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+.habit .sub{font-size:12px;color:var(--muted)}
+.badge{font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--bg);border:1px solid var(--line);white-space:nowrap}
+.badge.on{color:var(--ok);border-color:var(--ok)}
+.side-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.jokbox{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.stat{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.stat .v{font-size:24px;font-weight:700;line-height:1.1}
+.stat .l{font-size:12px;color:var(--muted)}
+.nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.nav strong{min-width:150px;text-align:center;text-transform:capitalize}
+.grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr)) 72px;gap:6px}
+.dow{font-size:12px;color:var(--muted);text-align:center;padding-bottom:2px}
+.day{aspect-ratio:1/0.82;border:1px solid var(--line);border-radius:10px;padding:5px 7px;font-size:13px;cursor:pointer;position:relative;user-select:none;background:var(--card)}
+.day:hover{border-color:var(--accent)}
+.day.other{color:var(--faded)}
+.day.today{box-shadow:0 0 0 2px var(--accent) inset}
+.day.future{opacity:.5;cursor:default}
+.day.future:hover{border-color:var(--line)}
+.day.done{color:#fff;font-weight:700}
+.day.paused{background:repeating-linear-gradient(45deg,var(--bg),var(--bg) 6px,var(--line) 6px,var(--line) 7px)}
+.day.due{border-style:dashed;border-width:2px}
+.day.late{border-color:var(--bad);border-width:2px}
+.mk{position:absolute;right:7px;bottom:3px;font-size:14px;line-height:1}
+.nt{position:absolute;right:6px;top:4px;font-size:11px}
+.pz{position:absolute;left:7px;bottom:3px;font-size:11px;color:var(--muted)}
+.bang{position:absolute;left:7px;bottom:2px;font-weight:800;font-size:16px;line-height:1}
+.bang.late{color:var(--bad)}
+.bang.caught{color:var(--warn)}
+.day.done .bang{color:#fff}
+.wk{display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;color:var(--muted);border-radius:10px;border:1px dashed var(--line);text-align:center}
+.wk b{font-size:13px;color:var(--ink)}
+.wk.met{color:var(--ok);border:1px solid var(--ok);font-weight:700}
+.wk.bad{color:var(--bad);border:1px solid var(--bad)}
+.wk.warn{color:var(--warn);border:1px solid var(--warn);font-weight:700}
+.hist{display:flex;gap:4px;margin-top:6px;align-items:center;flex-wrap:wrap}
+.hist span{width:16px;height:16px;border-radius:4px;border:1px solid var(--line);background:transparent}
+.hist span.met{border-color:transparent}
+.hist span.neutral{background:var(--line)}
+.hist span.cur{outline:2px solid var(--accent);outline-offset:1px}
+.small{font-size:12px;color:var(--muted)}
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.banner{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--bg);margin-bottom:14px}
+.banner.warn{border-color:var(--warn)}
+.banner.joker{border-color:var(--accent)}
+.banner.pause{border-color:var(--muted)}
+.otable{width:100%;border-collapse:collapse}
+.otable td{padding:9px 6px;border-top:1px solid var(--line);vertical-align:middle}
+.otable tr:first-child td{border-top:none}
+.pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
+.pill.ok{color:var(--ok);border-color:var(--ok)}
+.pill.bad{color:var(--bad);border-color:var(--bad)}
+.pill.warn{color:var(--warn);border-color:var(--warn)}
+.pill.muted{color:var(--muted)}
+.scroll{overflow-x:auto}
+.heat{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,12px);gap:3px;width:max-content;padding-bottom:4px}
+.heat i{display:block;width:12px;height:12px;border-radius:3px;background:var(--line)}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:14px}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);padding:20px;width:min(420px,92vw)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog p{margin:8px 0}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+input[type=text],input[type=number],input[type=date],select,textarea{width:100%;font:inherit;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink)}
+input[type=color]{width:60px;height:34px;border:1px solid var(--line);border-radius:8px;background:var(--bg);padding:2px}
+.row{display:flex;gap:10px}
+.row>*{flex:1}
+.daychk{display:flex;gap:6px;flex-wrap:wrap}
+.daychk label{display:flex;align-items:center;gap:4px;margin:0;padding:5px 9px;border:1px solid var(--line);border-radius:8px;color:var(--ink);cursor:pointer}
+.dlg-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:18px;flex-wrap:wrap}
+.err{color:var(--bad);font-size:13px}
+@media (max-width:600px){
+  .app{padding:8px;gap:12px}
+  .card{padding:10px}
+  .grid{grid-template-columns:repeat(7,minmax(0,1fr)) 48px;gap:3px}
+  .day{aspect-ratio:1/1.15;padding:2px 3px;font-size:11px;line-height:1.1;border-radius:7px}
+  .day.due,.day.late{border-width:1.5px}
+  .mk{right:2px;bottom:1px;font-size:9px}
+  .nt{display:none}
+  .pz{left:3px;bottom:1px;font-size:8px}
+  .bang{left:3px;bottom:0;font-size:11px}
+  .wk{font-size:9px;border-radius:7px;overflow:hidden;padding:0 1px}
+  .wk b{font-size:11px}
+  .nav strong{min-width:0;flex:1}
+  .stat .v{font-size:20px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="card">
+    <h1>Mes habitudes</h1>
+    <div id="list"></div>
+    <div class="side-actions">
+      <button class="primary" id="add">+ Nouvelle habitude</button>
+    </div>
+    <div class="jokbox" id="jokbox"></div>
+    <div class="side-actions">
+      <button id="export" title="Sauvegarder vos données dans un fichier">Exporter</button>
+      <button id="import" title="Restaurer depuis un fichier">Importer</button>
+      <input type="file" id="file" accept="application/json" hidden>
+    </div>
+    <p class="small" style="margin-top:14px">Les données sont enregistrées dans ce navigateur. Pensez à « Exporter » de temps en temps pour avoir une sauvegarde.</p>
+  </aside>
+  <main class="col" id="main"></main>
+</div>
+
+<dialog id="dlg">
+  <form method="dialog" id="form">
+    <h2 id="dlgTitle">Nouvelle habitude</h2>
+    <label for="fName">Nom</label>
+    <input type="text" id="fName" placeholder="Séance de sport" maxlength="60">
+    <label for="fMode">Type d'objectif</label>
+    <select id="fMode">
+      <option value="freq">Un nombre de fois par semaine / par mois</option>
+      <option value="days">Des jours précis de la semaine</option>
+    </select>
+    <div id="boxFreq">
+      <div class="row">
+        <div><label for="fTarget">Objectif</label><input type="number" id="fTarget" min="1" max="31" value="3"></div>
+        <div><label for="fPeriod">fois par</label>
+          <select id="fPeriod"><option value="week">semaine</option><option value="month">mois</option></select></div>
+      </div>
+    </div>
+    <div id="boxDays">
+      <label>Jours prévus</label>
+      <div class="daychk" id="fDays"></div>
+      <label for="fRest">Repos minimum entre deux séances</label>
+      <select id="fRest">
+        <option value="0">Aucun (peut s'enchaîner)</option>
+        <option value="1">1 jour</option>
+        <option value="2">2 jours</option>
+      </select>
+      <p class="small">Sert au décalage : si vous ratez une séance, les suivantes sont repoussées en respectant ce repos.</p>
+    </div>
+    <label>Jokers</label>
+    <div class="row">
+      <input type="number" id="fJok" min="0" max="10" value="0">
+      <select id="fJokPer"><option value="month">par mois</option><option value="2weeks">par 2 semaines</option></select>
+    </div>
+    <label for="fColor">Couleur</label>
+    <input type="color" id="fColor" value="#2f6fed">
+    <p class="err" id="fErr"></p>
+    <div class="dlg-actions">
+      <button type="button" id="cancel">Annuler</button>
+      <button type="submit" class="primary">Enregistrer</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+/* ============================== dates ============================== */
+const pad = n => String(n).padStart(2,'0');
+const fmt = d => d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parse = s => { const [y,m,d] = s.split('-').map(Number); return new Date(y,m-1,d,12); };
+const addDays = (d,n) => new Date(d.getFullYear(), d.getMonth(), d.getDate()+n, 12);
+const addDaysStr = (s,n) => fmt(addDays(parse(s),n));
+const wd = d => (d.getDay()+6)%7;                       // 0 = lundi
+const mondayOf = d => addDays(d, -wd(d));
+const today = () => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), n.getDate(), 12); };
+const T = () => fmt(today());
+const DAYS = ['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+const DAYS_LONG = ['lundi','mardi','mercredi','jeudi','vendredi','samedi','dimanche'];
+const longDate = s => parse(s).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'});
+const shortDate = s => parse(s).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short'});
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ============================== stockage ============================== */
+const LS = 'habitudes-v1';
+const COLORS = ['#2f6fed','#e0662b','#1f9d55','#a855c7','#d6a100','#d6336c','#0e9aa7'];
+
+function normHabit(h){
+  h.id = h.id || 'h'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+  h.name = h.name || 'Habitude';
+  h.color = h.color || COLORS[0];
+  h.period = h.period === 'month' ? 'month' : 'week';
+  h.days = Array.isArray(h.days) && h.days.length ? h.days.map(Number).sort() : null;
+  h.target = Math.max(1, parseInt(h.target,10) || 1);
+  if (h.days){ h.period = 'week'; h.target = h.days.length; }
+  h.rest = Number.isFinite(h.rest) ? h.rest : 1;
+  h.jokN = Number.isFinite(h.jokN) ? h.jokN : 0;
+  h.jokPer = h.jokPer === '2weeks' ? '2weeks' : 'month';
+  const log = {};
+  for (const d in (h.log||{})){ const v = h.log[d]; if (v) log[d] = v === true ? 1 : Math.min(2, Number(v)||1); }
+  h.log = log;
+  h.jok = h.jok || {}; h.notes = h.notes || {};
+  h.pauses = Array.isArray(h.pauses) ? h.pauses : [];
+  h.archived = !!h.archived;
+  if (!h.created){ const ks = Object.keys(h.log).sort(); h.created = ks[0] || T(); }
+  return h;
+}
+function load(){
+  try{
+    const s = JSON.parse(localStorage.getItem(LS));
+    if (s && Array.isArray(s.habits)){ s.habits.forEach(normHabit); s.since = s.since || T(); return s; }
+  }catch(e){}
+  return {habits:[], selected:null, since:T()};
+}
+function save(){ try{ localStorage.setItem(LS, JSON.stringify(state)); }catch(e){} }
+
+let state = load();
+let view = (() => { const n = new Date(); return {y:n.getFullYear(), m:n.getMonth()}; })();
+let editingId = null, jokerMode = false, showArchived = false;
+const current = () => state.habits.find(h => h.id === state.selected) || null;
+
+/* ============================== logique ============================== */
+const sessionsOn = (h,d) => (h.log[d]||0) + (h.jok[d]?1:0);
+const isPaused = (h,d) => h.pauses.some(p => d >= p.from && (!p.to || d <= p.to));
+const isActive = (h,d) => d >= h._start && !isPaused(h,d);
+function prep(h){
+  let s = h.created;
+  for (const d in h.log) if (d < s) s = d;
+  for (const d in h.jok) if (d < s) s = d;
+  h._start = s;
+}
+function activePause(h){ const tk = T(); return h.pauses.find(p => p.from <= tk && (!p.to || p.to >= tk)) || null; }
+
+const keyOf = (h,d) => h.period==='month' ? d.getFullYear()+'-'+pad(d.getMonth()+1) : fmt(mondayOf(d));
+function nextKey(h,k){
+  if (h.period==='month'){ let [y,m] = k.split('-').map(Number); m++; if (m>12){m=1;y++;} return y+'-'+pad(m); }
+  return addDaysStr(k,7);
+}
+function periodRange(h,key){
+  if (h.period==='month'){ const [y,m] = key.split('-').map(Number); return [new Date(y,m-1,1,12), new Date(y,m,0,12)]; }
+  const s = parse(key); return [s, addDays(s,6)];
+}
+/* infos d'une période (semaine ou mois) : objectif prorata des jours actifs (pause / avant la création) */
+function periodInfo(h,key){
+  const [s,e] = periodRange(h,key), tk = T();
+  let len=0, active=0, activeToDate=0, done=0, plannedActive=0;
+  for (let d = new Date(s); d <= e; d = addDays(d,1)){
+    const k = fmt(d); len++;
+    const act = isActive(h,k);
+    if (act){ active++; if (k <= tk) activeToDate++; if (h.days && h.days.includes(wd(d))) plannedActive++; }
+    done += sessionsOn(h,k);
+  }
+  let required;
+  if (h.days) required = plannedActive;
+  else required = active === 0 ? 0 : Math.ceil(h.target*active/len - 1e-9);
+  const status = required === 0 ? 'neutral' : (done >= required ? 'met' : (fmt(e) < tk ? 'failed' : 'open'));
+  return {key, start:fmt(s), end:fmt(e), required, done, status, activeToDate, active};
+}
+/* série en JOURS depuis qu'elle est active */
+function simulate(h){
+  const curKey = keyOf(h,today());
+  let key = keyOf(h,parse(h._start)), run = 0, best = 0, guard = 0;
+  const periods = [];
+  while (guard++ < 6000){
+    const i = periodInfo(h,key);
+    periods.push(i);
+    if (i.status === 'failed'){ best = Math.max(best,run); run = 0; }
+    else if (i.status === 'met'){ run += i.activeToDate; }
+    else if (i.status === 'open'){ if (run > 0) run += i.activeToDate; }
+    if (key >= curKey) break;
+    key = nextKey(h,key);
+  }
+  best = Math.max(best,run);
+  return {current:run, best, periods};
+}
+/* séances prévues d'une semaine (jours précis) avec décalage :
+   échéance = max(jour prévu, dernière séance + repos minimum) */
+function slotsForWeek(h, monday){
+  const mk = fmt(monday);
+  const planned = h.days.map(i => fmt(addDays(monday,i))).filter(p => isActive(h,p));
+  let prevDate = null;
+  for (const d in h.log) if (d < mk && h.log[d] && (!prevDate || d > prevDate)) prevDate = d;
+  for (const d in h.jok) if (d < mk && (!prevDate || d > prevDate)) prevDate = d;
+  const done = [];
+  for (let i=0;i<7;i++){ const d = fmt(addDays(monday,i)); for (let n=0;n<sessionsOn(h,d);n++) done.push(d); }
+  const gap = (h.rest||0) + 1, slots = []; let k = 0;
+  for (const p of planned){
+    const base = prevDate ? addDaysStr(prevDate,gap) : null;
+    const due = base && base > p ? base : p;
+    if (k < done.length){ slots.push({planned:p, due, done:done[k]}); prevDate = done[k]; k++; }
+    else { slots.push({planned:p, due, done:null}); prevDate = due; }
+  }
+  return slots;
+}
+const lateCount = (h,monday) => slotsForWeek(h,monday).filter(s => !s.done && s.due < T()).length;
+
+/* jokers */
+function jokerBlock(h,day){
+  if (h.jokPer === '2weeks'){
+    const m = mondayOf(parse(day));
+    return 'b'+Math.floor((Date.UTC(m.getFullYear(),m.getMonth(),m.getDate()) - Date.UTC(2024,0,1))/86400000/14);
+  }
+  return day.slice(0,7);
+}
+function jokersLeft(h,day){
+  const b = jokerBlock(h,day);
+  const used = Object.keys(h.jok).filter(d => jokerBlock(h,d) === b).length;
+  return Math.max(0, h.jokN - used);
+}
+const jokPerLabel = h => h.jokPer==='2weeks' ? 'par 2 semaines' : 'par mois';
+
+/* ============================== fenêtres ============================== */
+function modal(title, bodyHtml, buttons){
+  const d = document.createElement('dialog');
+  d.innerHTML = `<h2>${title}</h2><div class="mbody">${bodyHtml}</div><div class="dlg-actions"></div>`;
+  const act = d.querySelector('.dlg-actions');
+  buttons.forEach(b => {
+    const el = document.createElement('button'); el.type = 'button'; el.textContent = b.label;
+    if (b.cls) el.className = b.cls;
+    el.onclick = () => { const keep = b.onClick && b.onClick(d) === false; if (!keep) d.close(); };
+    act.appendChild(el);
+  });
+  d.addEventListener('close', () => d.remove());
+  document.body.appendChild(d); d.showModal(); return d;
+}
+const info = (title,text) => modal(title, `<p>${text}</p>`, [{label:'OK', cls:'primary'}]);
+
+function dayDialog(h,d){
+  const n = h.log[d];
+  const saveNote = m => { const v = m.querySelector('#nNote').value.trim(); if (v) h.notes[d] = v; else delete h.notes[d]; };
+  modal(esc(longDate(d)),
+    `<p class="small">${n===2 ? '2 séances ce jour-là' : 'Séance réalisée ✓'}</p>
+     <label for="nNote">Note</label><textarea id="nNote" rows="3">${esc(h.notes[d]||'')}</textarea>`,
+    [
+      {label:'Retirer', cls:'danger', onClick:() => { delete h.log[d]; delete h.notes[d]; save(); render(); }},
+      n===2
+        ? {label:'Repasser à 1 séance', onClick:m => { saveNote(m); h.log[d] = 1; save(); render(); }}
+        : {label:'Ajouter une 2ᵉ séance', onClick:m => { saveNote(m); save(); askDouble(h,d); }},
+      {label:'Enregistrer', cls:'primary', onClick:m => { saveNote(m); save(); render(); }}
+    ]);
+}
+function askDouble(h,d){
+  modal('Tu ne me mentirais pas, hein ? 🥺',
+    `<p>Deux séances le même jour, c'est possible (par exemple 2 h d'instrument au lieu d'une).</p>
+     <p>Mais c'est mieux de s'en tenir au plan que de rusher pour rattraper.</p>`,
+    [
+      {label:'Finalement non', onClick:() => render()},
+      {label:'Promis, c\'est honnête', cls:'primary', onClick:() => { h.log[d] = 2; save(); render(); }}
+    ]);
+}
+function jokerDayDialog(h,d){
+  modal('🃏 Joker', `<p>La séance du ${esc(longDate(d))} est couverte par un joker.</p>`,
+    [
+      {label:'Retirer le joker', cls:'danger', onClick:() => { delete h.jok[d]; save(); render(); }},
+      {label:'Fermer', cls:'primary'}
+    ]);
+}
+function pauseDialog(h){
+  modal('C\'est pas juste de la flemme hein ? 🤨',
+    `<p>Une pause, c'est légitime (vacances, maladie, blessure…). Mais sois honnête avec toi-même.</p>
+     <div class="row"><div><label for="pFrom">À partir du</label><input type="date" id="pFrom" value="${T()}"></div>
+     <div><label for="pTo">Jusqu'au (facultatif)</label><input type="date" id="pTo"></div></div>
+     <p class="small">Pendant la pause, la série est gelée : elle ne monte pas, mais elle ne se casse pas non plus.</p>
+     <p class="err" id="pErr"></p>`,
+    [
+      {label:'Bon… je continue 💪'},
+      {label:'Non, j\'en ai vraiment besoin', cls:'primary', onClick:m => {
+        const from = m.querySelector('#pFrom').value || T(), to = m.querySelector('#pTo').value || null;
+        if (to && to < from){ m.querySelector('#pErr').textContent = 'La date de fin est avant le début.'; return false; }
+        h.pauses.push({from,to}); save(); render();
+      }}
+    ]);
+}
+function applyJoker(h,d){
+  if (sessionsOn(h,d) > 0) return info('Déjà fait', 'Ce jour est déjà coché : choisissez un jour sans séance.');
+  if (!h.jokN) return info('Pas de joker', `Aucun joker n'est prévu pour « ${esc(h.name)} ». Vous pouvez en ajouter dans « Modifier ».`);
+  if (jokersLeft(h,d) <= 0) return info('Plus de joker', `Il n'y a plus de joker disponible pour « ${esc(h.name)} » sur cette période (${h.jokN} ${jokPerLabel(h)}).`);
+  h.jok[d] = true; jokerMode = false; save(); render();
+}
+
+/* ============================== rendu ============================== */
+function statusToday(h){
+  const tk = T();
+  if (isPaused(h,tk)) return {t:'⏸ En pause', c:'muted'};
+  const done = sessionsOn(h,tk) > 0;
+  if (h.days){
+    const slots = slotsForWeek(h, mondayOf(today()));
+    const late = slots.filter(s => !s.done && s.due < tk);
+    if (late.length) return {t:`! En retard (${late.length})`, c:'bad'};
+    if (done) return {t:'✓ Fait aujourd\'hui', c:'ok'};
+    const pend = slots.find(s => !s.done);
+    if (pend) return pend.due === tk ? {t:'À faire aujourd\'hui', c:'warn'} : {t:'Prochaine : '+shortDate(pend.due), c:'muted'};
+    return {t:'Semaine validée ✓', c:'ok'};
+  }
+  const i = periodInfo(h, keyOf(h,today()));
+  if (i.status === 'met') return {t: done ? '✓ Fait · objectif atteint' : 'Objectif atteint ✓', c:'ok'};
+  return done ? {t:'✓ Fait aujourd\'hui', c:'ok'} : {t:'À faire', c:'warn'};
+}
+const objectiveText = h => h.days
+  ? h.days.map(i => DAYS[i]).join(' · ')
+  : `${h.target}× par ${h.period==='month'?'mois':'semaine'}`;
+
+function renderList(){
+  const el = document.getElementById('list');
+  const act = state.habits.filter(h => !h.archived), arch = state.habits.filter(h => h.archived);
+  const row = h => {
+    const s = h.archived ? null : simulate(h).current;
+    return `<div class="habit ${h.id===state.selected?'sel':''} ${h.archived?'arch':''}" data-act="select" data-id="${h.id}">
+      <span class="dot" style="background:${h.color}"></span>
+      <div style="flex:1;min-width:0"><div class="name">${esc(h.name)}</div><div class="sub">${esc(objectiveText(h))}</div></div>
+      ${h.archived ? '<span class="badge">archivée</span>' : `<span class="badge ${s>0?'on':''}">🔥 ${s} j</span>`}</div>`;
+  };
+  let html = act.length ? act.map(row).join('') : '<p class="small">Aucune habitude pour l\'instant.</p>';
+  if (arch.length){
+    html += `<p class="small" style="margin:10px 0 4px"><a class="lnk" data-act="toggleArch">${showArchived?'▾':'▸'} Archivées (${arch.length})</a></p>`;
+    if (showArchived) html += arch.map(row).join('');
+  }
+  el.innerHTML = html;
+
+  const h = current(), jb = document.getElementById('jokbox');
+  if (h && !h.archived){
+    const left = jokersLeft(h,T());
+    jb.innerHTML = `<button data-act="joker" ${jokerMode?'class="primary"':''}>🃏 Utiliser un joker</button>
+      <div class="small" style="margin-top:6px">${h.jokN ? `${left}/${h.jokN} restant${left>1?'s':''} (${jokPerLabel(h)}) pour « ${esc(h.name)} »` : `Aucun joker prévu pour « ${esc(h.name)} »`}</div>`;
+  } else jb.innerHTML = '';
+}
+
+function backupBanner(){
+  const tk = T();
+  if (!state.habits.length) return '';
+  const ref = state.lastBackup || state.since;
+  const age = Math.round((parse(tk) - parse(ref))/86400000);
+  if (age < 14 || (state.snoozeUntil && state.snoozeUntil > tk)) return '';
+  return `<div class="banner warn"><span>💾 ${state.lastBackup ? `Dernière sauvegarde il y a ${age} jours.` : 'Vous n\'avez encore jamais sauvegardé vos données.'} Un petit export ?</span>
+    <span><button class="primary mini" data-act="backup">Exporter maintenant</button> <button class="mini" data-act="later">Plus tard</button></span></div>`;
+}
+
+function renderOverview(){
+  const hs = state.habits.filter(h => !h.archived);
+  if (!hs.length) return '';
+  const tk = T();
+  const rows = hs.map(h => {
+    const s = simulate(h), i = periodInfo(h, keyOf(h,today())), st = statusToday(h);
+    const prog = i.required ? `<b>${i.done}/${i.required}</b> <span class="small">${h.period==='month'?'ce mois':'cette semaine'}</span>` : '<span class="small">—</span>';
+    const btn = (!isPaused(h,tk) && sessionsOn(h,tk) === 0) ? `<button class="mini" data-act="quick" data-id="${h.id}">✓ Fait</button>` : '';
+    return `<tr>
+      <td><span class="dot" style="background:${h.color}"></span> <a class="lnk" data-act="select" data-id="${h.id}">${esc(h.name)}</a><div class="small">${esc(objectiveText(h))}</div></td>
+      <td>${prog}</td>
+      <td><b>🔥 ${s.current} j</b><div class="small">record ${s.best} j</div></td>
+      <td><span class="pill ${st.c}">${st.t}</span></td>
+      <td style="text-align:right">${btn}</td></tr>`;
+  }).join('');
+  return `<section class="card"><div class="head" style="margin-bottom:6px"><h2>Vue d'ensemble · ${esc(longDate(tk))}</h2></div>
+    <div class="scroll"><table class="otable">${rows}</table></div></section>`;
+}
+
+function heatmap(h){
+  const m = mondayOf(today()), tk = T(); let html = '';
+  for (let w=52; w>=0; w--) for (let i=0;i<7;i++){
+    const dd = addDays(m, -7*w+i), k = fmt(dd), n = sessionsOn(h,k);
+    let st = '';
+    if (k > tk) st = 'visibility:hidden';
+    else if (h.jok[k]) st = `background:color-mix(in srgb,${h.color} 35%,var(--line));outline:1px solid ${h.color}`;
+    else if (n > 0) st = `background:${h.color};opacity:${n>=2?1:.72}`;
+    else if (isPaused(h,k)) st = 'background:var(--faded);opacity:.4';
+    html += `<i style="${st}" title="${k}${n?` · ${n} séance${n>1?'s':''}`:''}"></i>`;
+  }
+  return `<div class="scroll"><div class="heat">${html}</div></div>`;
+}
+
+function renderDetail(){
+  const h = current();
+  if (!h) return `<section class="card"><div class="empty"><p style="font-size:32px;margin:0">📅</p><p>Créez votre première habitude pour commencer.</p></div></section>`;
+  const tk = T(), sim = simulate(h), curKey = keyOf(h,today()), ci = periodInfo(h,curKey);
+  const total = Object.values(h.log).reduce((a,b) => a+b, 0);
+  const periodWord = h.period==='month' ? 'mois' : 'semaine';
+  const pa = activePause(h);
+  const futurePauses = h.pauses.map((p,idx) => ({p,idx})).filter(x => x.p.from > tk);
+
+  /* historique 12 périodes */
+  const hp = sim.periods.slice(-12);
+  const hist = hp.map(p => `<span class="${p.status==='met'?'met':''} ${p.status==='neutral'?'neutral':''} ${p.key===curKey?'cur':''}" style="${p.status==='met'?`background:${h.color}`:''}" title="${p.key} : ${p.done}/${p.required}"></span>`).join('');
+
+  /* calendrier */
+  const first = new Date(view.y, view.m, 1, 12);
+  let d = mondayOf(first), cells = '';
+  while (true){
+    const wkStart = new Date(d), wkKey = fmt(wkStart);
+    const slots = h.days ? slotsForWeek(h,wkStart) : [];
+    const dueMap = {}, caughtMap = {};
+    slots.forEach(s => {
+      if (!s.done) dueMap[s.due] = s;
+      else if (s.done > s.planned && sessionsOn(h,s.planned) === 0) caughtMap[s.planned] = s;
+    });
+    let wk = 0;
+    for (let i=0;i<7;i++){
+      const key = fmt(d), n = h.log[key]||0, jk = !!h.jok[key], future = key > tk;
+      wk += sessionsOn(h,key);
+      const cls = ['day'];
+      let style = '', mk = '', bang = '', title = '';
+      if (d.getMonth() !== view.m) cls.push('other');
+      if (key === tk) cls.push('today');
+      if (future) cls.push('future');
+      if (isPaused(h,key)) { cls.push('paused'); mk = mk || ''; }
+      if (n > 0){ cls.push('done'); style = `background:${h.color};border-color:${h.color}`; mk = n>=2 ? '✓✓' : '✓'; }
+      else if (jk){ style = `background:color-mix(in srgb,${h.color} 28%,var(--card));border-color:${h.color}`; mk = '🃏'; title = 'Joker'; }
+      if (dueMap[key]){
+        if (key < tk){ cls.push('late'); bang = '<b class="bang late">!</b>'; title = 'Séance en retard'; }
+        else { cls.push('due'); style += `;border-color:${h.color}`; title = key===tk ? 'À faire aujourd\'hui' : 'Séance prévue'; }
+      } else if (caughtMap[key]){
+        bang = '<b class="bang caught">!</b>'; title = 'Rattrapée le '+longDate(caughtMap[key].done);
+      }
+      const note = h.notes[key] ? `<span class="nt" title="${esc(h.notes[key])}">📝</span>` : '';
+      const pz = (isPaused(h,key) && n===0 && !jk) ? '<span class="pz">⏸</span>' : '';
+      cells += `<div class="${cls.join(' ')}" data-act="day" data-d="${key}" style="${style}" title="${esc(title)}">${d.getDate()}${note}${pz}${bang}<span class="mk">${mk}</span></div>`;
+      d = addDays(d,1);
+    }
+    let big, small = '', wcls = '';
+    if (h.period === 'week'){
+      const wi = periodInfo(h,wkKey), late = h.days ? slots.filter(s => !s.done && s.due < tk).length : 0;
+      if (wi.required === 0){ big = String(wk); small = '—'; }
+      else {
+        big = `${wk}/${wi.required}`;
+        if (wi.status==='met'){ small = '✓ objectif'; wcls = 'met'; }
+        else if (wi.status==='failed'){ small = '✗ manqué'; wcls = 'bad'; }
+        else if (late > 0){ small = '! retard'; wcls = 'warn'; }
+        else small = wi.start > tk ? '' : 'en cours';
+      }
+    } else { big = String(wk); small = 'sem.'; }
+    cells += `<div class="wk ${wcls}"><b>${big}</b><span>${small}</span></div>`;
+    if (d.getMonth() !== view.m && d > first) break;
+  }
+
+  /* stats */
+  const done3 = sim.periods.filter(p => p.end >= addDaysStr(tk,-91) && (p.status==='met'||p.status==='failed'));
+  const rate = done3.length ? Math.round(100*done3.filter(p => p.status==='met').length/done3.length)+' %' : '—';
+  const byDay = [0,0,0,0,0,0,0];
+  for (const k in h.log) byDay[wd(parse(k))] += h.log[k];
+  const topDay = total >= 5 ? byDay.indexOf(Math.max(...byDay)) : -1;
+  const left = jokersLeft(h,tk);
+
+  return `<section class="card">
+    ${pa ? `<div class="banner pause"><span>⏸ Habitude en pause depuis le ${esc(shortDate(pa.from))}${pa.to?` jusqu'au ${esc(shortDate(pa.to))}`:''}. La série est gelée.</span><button class="mini" data-act="resume">▶ Reprendre</button></div>` : ''}
+    ${futurePauses.map(x => `<div class="banner pause"><span>⏸ Pause prévue du ${esc(shortDate(x.p.from))}${x.p.to?` au ${esc(shortDate(x.p.to))}`:''}</span><button class="mini" data-act="cancelPause" data-i="${x.idx}">Annuler la pause</button></div>`).join('')}
+    ${jokerMode ? `<div class="banner joker"><span>🃏 Cliquez sur le jour de la séance à couvrir avec un joker.</span><button class="mini" data-act="jokerCancel">Annuler</button></div>` : ''}
+    <div class="head">
+      <div style="display:flex;align-items:center;gap:10px"><span class="dot" style="background:${h.color};width:16px;height:16px"></span>
+        <div><h2>${esc(h.name)}</h2><div class="small">Objectif : ${h.days ? esc(h.days.map(i=>DAYS_LONG[i]).join(', ')) + ` (repos min. ${h.rest} j)` : `${h.target} fois par ${periodWord}`}</div></div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${h.archived
+          ? `<button data-act="restore">Restaurer</button><button class="danger" data-act="del">Supprimer définitivement</button>`
+          : `<button data-act="edit">Modifier</button>${pa ? '' : '<button data-act="pause">⏸ Pause</button>'}<button data-act="archive">Archiver</button>`}
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat"><div class="v">🔥 ${sim.current} j</div><div class="l">Série actuelle (jours depuis qu'elle est active)</div></div>
+      <div class="stat"><div class="v">${sim.best} j</div><div class="l">Meilleure série</div></div>
+      <div class="stat"><div class="v">${ci.required ? `${ci.done}/${ci.required}` : '—'}</div><div class="l">${h.period==='month'?'Ce mois-ci':'Cette semaine'}${ci.status==='met'?' · objectif atteint ✓':''}</div></div>
+      <div class="stat"><div class="v">${total}</div><div class="l">Total de séances</div></div>
+      <div class="stat"><div class="v">🃏 ${h.jokN ? `${left}/${h.jokN}` : '—'}</div><div class="l">Jokers restants (${jokPerLabel(h)})</div></div>
+    </div>
+    <div class="head" style="margin-bottom:8px">
+      <div class="nav"><button data-act="prev">←</button><strong>${new Date(view.y,view.m,1).toLocaleDateString('fr-FR',{month:'long',year:'numeric'})}</strong><button data-act="next">→</button><button data-act="todayBtn">Aujourd'hui</button></div>
+    </div>
+    <div class="grid">
+      ${DAYS.map(x=>`<div class="dow">${x}</div>`).join('')}<div class="dow">Bilan</div>
+      ${cells}
+    </div>
+    <p class="small" style="margin:10px 0 0">Légende : <b style="color:var(--bad)">!</b> séance en retard · <b style="color:var(--warn)">!</b> séance rattrapée plus tard · cadre pointillé = séance prévue · 🃏 joker · ⏸ pause · 📝 note</p>
+    <p class="small" style="margin:14px 0 0">12 dernières ${h.period==='month'?'périodes (mois)':'semaines'} — plein = objectif atteint :</p>
+    <div class="hist">${hist}</div>
+    <p class="small" style="margin-top:12px">Un clic sur un jour coche la séance ; un clic sur un jour déjà coché permet de la retirer, d'ajouter une 2ᵉ séance ou de noter quelque chose. L'objectif est validé dès que le nombre de séances est atteint avant la fin ${h.period==='month'?'du mois':'de la semaine'}.</p>
+  </section>
+  <section class="card">
+    <h2 style="margin-bottom:12px">Statistiques · ${esc(h.name)}</h2>
+    <div class="two">
+      <div class="stat"><div class="v">${rate}</div><div class="l">Objectifs atteints sur ~3 mois</div></div>
+      <div class="stat"><div class="v">${topDay>=0 ? DAYS_LONG[topDay] : '—'}</div><div class="l">Jour où vous êtes le plus régulier${topDay>=0?` (${byDay[topDay]} séances)`:' (plus de données nécessaires)'}</div></div>
+    </div>
+    <p class="small" style="margin:0 0 6px">Les 12 derniers mois — une case par jour (plus foncé = séance, 🃏 contour = joker) :</p>
+    ${heatmap(h)}
+  </section>`;
+}
+
+function render(){
+  state.habits.forEach(prep);
+  const vis = state.habits.filter(h => showArchived || !h.archived);
+  if (!current() || (current().archived && !showArchived)) state.selected = (state.habits.find(h => !h.archived) || vis[0] || {}).id || null;
+  renderList();
+  document.getElementById('main').innerHTML = backupBanner() + renderOverview() + renderDetail();
+}
+
+/* ============================== actions ============================== */
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-act]'); if (!t) return;
+  const a = t.dataset.act, h = current(), tk = T();
+  switch (a){
+    case 'select': state.selected = t.dataset.id; jokerMode = false; save(); render(); window.scrollTo({top:0}); break;
+    case 'toggleArch': showArchived = !showArchived; render(); break;
+    case 'quick': { const x = state.habits.find(z => z.id===t.dataset.id); if (x && sessionsOn(x,tk)===0){ x.log[tk] = 1; save(); render(); } break; }
+    case 'day': {
+      if (!h) break; const d = t.dataset.d; if (d > tk) break;
+      if (jokerMode) return applyJoker(h,d);
+      if (h.jok[d]) return jokerDayDialog(h,d);
+      if (h.log[d]) return dayDialog(h,d);
+      h.log[d] = 1; save(); render(); break;
+    }
+    case 'prev': view.m--; if (view.m<0){view.m=11;view.y--;} render(); break;
+    case 'next': view.m++; if (view.m>11){view.m=0;view.y++;} render(); break;
+    case 'todayBtn': { const n = new Date(); view = {y:n.getFullYear(), m:n.getMonth()}; render(); break; }
+    case 'edit': openDlg(h); break;
+    case 'pause': pauseDialog(h); break;
+    case 'resume': {
+      const p = activePause(h), y = addDaysStr(tk,-1);
+      if (p){ if (y < p.from) h.pauses.splice(h.pauses.indexOf(p),1); else p.to = y; }
+      save(); render(); break;
+    }
+    case 'cancelPause': h.pauses.splice(Number(t.dataset.i),1); save(); render(); break;
+    case 'archive': h.archived = true; state.selected = null; save(); render(); break;
+    case 'restore': h.archived = false; save(); render(); break;
+    case 'del':
+      if (confirm(`Supprimer définitivement « ${h.name} » et tout son historique ?`)){
+        state.habits = state.habits.filter(x => x.id !== h.id); state.selected = null; save(); render();
+      }
+      break;
+    case 'joker': jokerMode = !jokerMode; render(); break;
+    case 'jokerCancel': jokerMode = false; render(); break;
+    case 'backup': exportData(); render(); break;
+    case 'later': state.snoozeUntil = addDaysStr(tk,3); save(); render(); break;
+  }
+});
+
+/* ============================== formulaire ============================== */
+const dlg = document.getElementById('dlg');
+const $ = id => document.getElementById(id);
+function syncMode(){
+  const days = $('fMode').value === 'days';
+  $('boxDays').style.display = days ? '' : 'none';
+  $('boxFreq').style.display = days ? 'none' : '';
+}
+$('fMode').onchange = syncMode;
+function openDlg(h){
+  editingId = h ? h.id : null;
+  $('dlgTitle').textContent = h ? 'Modifier l\'habitude' : 'Nouvelle habitude';
+  $('fName').value = h ? h.name : '';
+  $('fMode').value = h && h.days ? 'days' : 'freq';
+  $('fTarget').value = h && !h.days ? h.target : 3;
+  $('fPeriod').value = h ? h.period : 'week';
+  $('fRest').value = h ? String(h.rest) : '1';
+  $('fJok').value = h ? h.jokN : 0;
+  $('fJokPer').value = h ? h.jokPer : 'month';
+  $('fColor').value = h ? h.color : COLORS[state.habits.length % COLORS.length];
+  $('fDays').innerHTML = DAYS.map((x,i) => `<label><input type="checkbox" value="${i}" ${h && h.days && h.days.includes(i)?'checked':''}> ${x}</label>`).join('');
+  $('fErr').textContent = '';
+  syncMode(); dlg.showModal(); $('fName').focus();
+}
+$('add').onclick = () => openDlg(null);
+$('cancel').onclick = () => dlg.close();
+$('form').onsubmit = e => {
+  e.preventDefault();
+  const name = $('fName').value.trim();
+  if (!name){ $('fErr').textContent = 'Donnez un nom à l\'habitude.'; return; }
+  const mode = $('fMode').value;
+  const days = mode === 'days' ? [...$('fDays').querySelectorAll('input:checked')].map(i => Number(i.value)) : null;
+  if (mode === 'days' && !days.length){ $('fErr').textContent = 'Cochez au moins un jour.'; return; }
+  const vals = {
+    name, color:$('fColor').value, days,
+    target: Math.max(1, parseInt($('fTarget').value,10) || 1),
+    period: mode === 'days' ? 'week' : $('fPeriod').value,
+    rest: parseInt($('fRest').value,10) || 0,
+    jokN: Math.max(0, parseInt($('fJok').value,10) || 0),
+    jokPer: $('fJokPer').value
+  };
+  if (editingId){ const h = state.habits.find(x => x.id === editingId); Object.assign(h, vals); normHabit(h); }
+  else { const h = normHabit(Object.assign({log:{}, created:T()}, vals)); state.habits.push(h); state.selected = h.id; }
+  dlg.close(); save(); render();
+};
+
+/* ============================== export / import ============================== */
+function exportData(){
+  state.lastBackup = T(); save();
+  const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'habitudes-'+T()+'.json'; a.click(); URL.revokeObjectURL(a.href);
+}
+$('export').onclick = () => { exportData(); render(); };
+$('import').onclick = () => $('file').click();
+$('file').onchange = e => {
+  const f = e.target.files[0]; if (!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try{
+      const s = JSON.parse(r.result);
+      if (!s || !Array.isArray(s.habits)) throw 0;
+      if (confirm('Remplacer les données actuelles par celles du fichier ?')){
+        s.habits.forEach(normHabit); s.since = s.since || T(); state = s; save(); render();
+      }
+    }catch(err){ info('Fichier invalide', 'Ce fichier ne ressemble pas à une sauvegarde de cette appli.'); }
+  };
+  r.readAsText(f); e.target.value = '';
+};
+
+render();
+if ("serviceWorker" in navigator && location.protocol.startsWith("http")) navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>
