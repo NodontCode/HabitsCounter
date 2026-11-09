@@ -95,6 +95,7 @@ button.mini{padding:3px 9px;font-size:13px}
 .banner.warn{border-color:var(--warn)}
 .banner.joker{border-color:var(--accent)}
 .banner.pause{border-color:var(--muted)}
+.banner.install{border-color:var(--accent)}
 .ocs{display:flex;flex-direction:column;gap:10px}
 .oc{display:flex;align-items:center;gap:14px;border-radius:22px;padding:14px 16px;cursor:pointer}
 .oc .on{font-size:17px;font-weight:800}
@@ -248,6 +249,27 @@ function load(){
 function save(){ try{ localStorage.setItem(LS, JSON.stringify(state)); }catch(e){} }
 
 let state = load();
+
+/* ============================== installation de l'appli ============================== */
+let installEvt = null;
+const isStandalone = () => (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+const isIOS = () => /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const canInstall = () => !isStandalone() && location.protocol.indexOf('http') === 0 && (!!installEvt || isIOS());
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installEvt = e; render(); });
+window.addEventListener('appinstalled', () => { installEvt = null; render(); });
+async function doInstall(){
+  if (!installEvt) return;
+  installEvt.prompt();
+  try{ await installEvt.userChoice; }catch(err){}
+  installEvt = null; render();
+}
+function installBanner(){
+  if (!canInstall() || (state.installSnooze && state.installSnooze > T())) return '';
+  const txt = installEvt
+    ? 'Installez l\'appli sur cet appareil : une icône, un plein écran, et ça marche même sans connexion.'
+    : 'Pour l\'installer sur iPhone : touchez le bouton Partager de Safari, puis « Sur l\'écran d\'accueil ».';
+  return `<div class="banner install"><span>📲 ${txt}</span><span>${installEvt ? '<button class="primary mini" data-act="install">Installer</button> ' : ''}<button class="mini" data-act="installLater">Plus tard</button></span></div>`;
+}
 let view = (() => { const n = new Date(); return {y:n.getFullYear(), m:n.getMonth()}; })();
 let editingId = null, jokerMode = false, showArchived = false;
 const current = () => state.habits.find(h => h.id === state.selected) || null;
@@ -421,7 +443,7 @@ function settingsDialog(){
       {label:'Fermer'},
       {label:'Importer', onClick:() => { document.getElementById('file').click(); }},
       {label:'Exporter', cls:'primary', onClick:() => { exportData(); render(); }}
-    ]);
+    ].concat(installEvt ? [{label:'Installer l\'appli', onClick:() => { doInstall(); }}] : []));
 }
 function applyJoker(h,d){
   if (sessionsOn(h,d) > 0) return info('Déjà fait', 'Ce jour est déjà coché : choisissez un jour sans séance.');
@@ -622,7 +644,7 @@ function render(){
   const vis = state.habits.filter(h => showArchived || !h.archived);
   if (!current() || (current().archived && !showArchived)) state.selected = (state.habits.find(h => !h.archived) || vis[0] || {}).id || null;
   renderList();
-  document.getElementById('main').innerHTML = backupBanner() + renderOverview() + renderDetail();
+  document.getElementById('main').innerHTML = installBanner() + backupBanner() + renderOverview() + renderDetail();
 }
 
 /* ============================== actions ============================== */
@@ -656,6 +678,8 @@ document.addEventListener('click', e => {
     case 'del': deleteDialog(h); break;
     case 'joker': jokerMode = !jokerMode; render(); break;
     case 'jokerCancel': jokerMode = false; render(); break;
+    case 'install': doInstall(); break;
+    case 'installLater': state.installSnooze = addDaysStr(tk,7); save(); render(); break;
     case 'backup': exportData(); render(); break;
     case 'later': state.snoozeUntil = addDaysStr(tk,3); save(); render(); break;
   }
