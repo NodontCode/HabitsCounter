@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Habitudes</title>
-<meta name="theme-color" content="#2f6fed">
+<meta name="theme-color" content="#0A7F90">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Habitudes">
@@ -15,26 +15,30 @@
 
 <style>
 :root{
-  --bg:#f6f5f1; --card:#ffffff; --ink:#1f2328; --muted:#6b7280; --line:#e4e2db; --accent:#2f6fed;
-  --ok:#1f9d55; --faded:#b7b5ad; --bad:#d33a3a; --warn:#d98200;
+  --bg:#F4FBFC; --card:#FFFFFF; --cell:#E3F3F6; --ink:#1F2D33; --muted:#4F6169; --line:#D3E8EC; --accent:#0A7F90; --onaccent:#FFFFFF;
+  --ok:#1F8F5F; --faded:#9AB3BA; --bad:#C62E48; --warn:#A85F00; --shadow:0 6px 20px rgba(10,127,144,.10);
 }
 @media (prefers-color-scheme: dark){
-  :root{ --bg:#16171a; --card:#202226; --ink:#e8e8e6; --muted:#9a9ca3; --line:#33353b; --accent:#6c9bff; --ok:#3ecf7a; --faded:#55575e; --bad:#ff6b6b; --warn:#ffb347; }
+  :root{ --bg:#101A1C; --card:#182427; --cell:#213236; --ink:#E6F1F3; --muted:#A4BCC2; --line:#2E4448; --accent:#4CC3D4; --onaccent:#062A30; --ok:#4FD39A; --faded:#5E5878; --bad:#FF7A8C; --warn:#FFB347; --shadow:none; }
 }
 *{box-sizing:border-box}
 body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 ui-rounded,"SF Pro Rounded","Nunito","Segoe UI Variable","Segoe UI",system-ui,-apple-system,Roboto,sans-serif}
 .app{display:grid;grid-template-columns:290px 1fr;gap:20px;max-width:1180px;margin:0 auto;padding:24px;align-items:start}
 @media (max-width:860px){.app{grid-template-columns:minmax(0,1fr)}}
 .col{display:flex;flex-direction:column;gap:20px;min-width:0}
-.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:18px;box-shadow:var(--shadow)}
 h1{font-size:18px;margin:0 0 12px}
 h2{font-size:16px;margin:0}
 h3{font-size:14px;margin:0 0 8px}
-button{font:inherit;color:inherit;background:transparent;border:1px solid var(--line);border-radius:8px;padding:6px 12px;cursor:pointer}
+button{font:inherit;font-weight:600;color:inherit;background:transparent;border:1px solid var(--line);border-radius:999px;padding:7px 15px;cursor:pointer}
 button:hover{border-color:var(--accent)}
-button.primary{background:var(--accent);border-color:var(--accent);color:#fff}
-button.danger:hover{border-color:var(--bad);color:var(--bad)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--onaccent)}
+button.danger{color:var(--bad);border-color:var(--bad)}
+button.danger:hover{background:var(--cell)}
+button.ghost{border:none;background:transparent;color:var(--muted);font-size:13px;font-weight:500;padding:4px 6px}
+button.ghost:hover{color:var(--accent)}
+button.ghost.on{color:var(--accent);font-weight:700}
 button.mini{padding:3px 9px;font-size:13px}
 .lnk{cursor:pointer;font-weight:600}
 .lnk:hover{color:var(--accent)}
@@ -48,17 +52,17 @@ button.mini{padding:3px 9px;font-size:13px}
 .badge{font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--bg);border:1px solid var(--line);white-space:nowrap}
 .badge.on{color:var(--ok);border-color:var(--ok)}
 .side-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-.jokbox{margin-top:14px;padding-top:12px;border-top:1px dashed var(--line)}
+.jokbox{margin-top:8px}
 .head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
-.stat{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.stat{background:var(--cell);border-radius:18px;padding:12px 14px}
 .stat .v{font-size:24px;font-weight:700;line-height:1.1}
 .stat .l{font-size:12px;color:var(--muted)}
 .nav{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .nav strong{min-width:150px;text-align:center;text-transform:capitalize}
 .grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr)) 72px;gap:6px}
 .dow{font-size:12px;color:var(--muted);text-align:center;padding-bottom:2px}
-.day{aspect-ratio:1/0.82;border:1px solid var(--line);border-radius:10px;padding:5px 7px;font-size:13px;cursor:pointer;position:relative;user-select:none;background:var(--card)}
+.day{aspect-ratio:1/0.82;border:2px solid transparent;border-radius:12px;padding:4px 6px;font-size:13px;font-weight:600;cursor:pointer;position:relative;user-select:none;background:var(--cell)}
 .day:hover{border-color:var(--accent)}
 .day.other{color:var(--faded)}
 .day.today{box-shadow:0 0 0 2px var(--accent) inset}
@@ -91,19 +95,20 @@ button.mini{padding:3px 9px;font-size:13px}
 .banner.warn{border-color:var(--warn)}
 .banner.joker{border-color:var(--accent)}
 .banner.pause{border-color:var(--muted)}
-.otable{width:100%;border-collapse:collapse}
-.otable td{padding:9px 6px;border-top:1px solid var(--line);vertical-align:middle}
-.otable tr:first-child td{border-top:none}
+.ocs{display:flex;flex-direction:column;gap:10px}
+.oc{display:flex;align-items:center;gap:14px;border-radius:22px;padding:14px 16px;cursor:pointer}
+.oc .on{font-size:17px;font-weight:800}
+.oc .big{font-size:34px;font-weight:800;line-height:1;text-align:center}
+.dots{display:flex;gap:5px;margin-top:8px;flex-wrap:wrap}
+.dots i{width:12px;height:12px;border-radius:50%;border:2px solid;box-sizing:border-box;display:block}
 .pill{display:inline-block;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;border:1px solid var(--line);white-space:nowrap}
 .pill.ok{color:var(--ok);border-color:var(--ok)}
 .pill.bad{color:var(--bad);border-color:var(--bad)}
 .pill.warn{color:var(--warn);border-color:var(--warn)}
 .pill.muted{color:var(--muted)}
 .scroll{overflow-x:auto}
-.heat{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,12px);gap:3px;width:max-content;padding-bottom:4px}
-.heat i{display:block;width:12px;height:12px;border-radius:3px;background:var(--line)}
 .two{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin-bottom:14px}
-dialog{border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--ink);padding:20px;width:min(420px,92vw)}
+dialog{border:1px solid var(--line);border-radius:22px;background:var(--card);color:var(--ink);padding:20px;width:min(420px,92vw)}
 dialog::backdrop{background:rgba(0,0,0,.4)}
 dialog p{margin:8px 0}
 label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
@@ -119,7 +124,7 @@ input[type=color]{width:60px;height:34px;border:1px solid var(--line);border-rad
   .app{padding:8px;gap:12px}
   .card{padding:10px}
   .grid{grid-template-columns:repeat(7,minmax(0,1fr)) 48px;gap:3px}
-  .day{aspect-ratio:1/1.15;padding:2px 3px;font-size:11px;line-height:1.1;border-radius:7px}
+  .day{aspect-ratio:1/1.15;padding:2px 3px;font-size:11px;line-height:1.1;border-radius:9px}
   .day.due,.day.late{border-width:1.5px}
   .mk{right:2px;bottom:1px;font-size:9px}
   .nt{display:none}
@@ -141,12 +146,10 @@ input[type=color]{width:60px;height:34px;border:1px solid var(--line);border-rad
       <button class="primary" id="add">+ Nouvelle habitude</button>
     </div>
     <div class="jokbox" id="jokbox"></div>
-    <div class="side-actions">
-      <button id="export" title="Sauvegarder vos données dans un fichier">Exporter</button>
-      <button id="import" title="Restaurer depuis un fichier">Importer</button>
+    <div class="side-actions" style="margin-top:4px">
+      <button class="ghost" id="settings">⚙ Réglages</button>
       <input type="file" id="file" accept="application/json" hidden>
     </div>
-    <p class="small" style="margin-top:14px">Les données sont enregistrées dans ce navigateur. Pensez à « Exporter » de temps en temps pour avoir une sauvegarde.</p>
   </aside>
   <main class="col" id="main"></main>
 </div>
@@ -185,7 +188,7 @@ input[type=color]{width:60px;height:34px;border:1px solid var(--line);border-rad
       <select id="fJokPer"><option value="month">par mois</option><option value="2weeks">par 2 semaines</option></select>
     </div>
     <label for="fColor">Couleur</label>
-    <input type="color" id="fColor" value="#2f6fed">
+    <input type="color" id="fColor" value="#0a7f90">
     <p class="err" id="fErr"></p>
     <div class="dlg-actions">
       <button type="button" id="cancel">Annuler</button>
@@ -213,7 +216,7 @@ const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>'
 
 /* ============================== stockage ============================== */
 const LS = 'habitudes-v1';
-const COLORS = ['#2f6fed','#e0662b','#1f9d55','#a855c7','#d6a100','#d6336c','#0e9aa7'];
+const COLORS = ['#0A7F90','#E0662B','#7A5AE0','#D6336C','#2F6FED','#C9962B','#1F9D6B'];
 
 function normHabit(h){
   h.id = h.id || 'h'+Date.now().toString(36)+Math.random().toString(36).slice(2,5);
@@ -370,7 +373,7 @@ function dayDialog(h,d){
     ]);
 }
 function askDouble(h,d){
-  modal('Tu ne me mentirais pas, hein ? 🥺',
+  modal('C\'est vrai ce mensonge ?',
     `<p>Deux séances le même jour, c'est possible (par exemple 2 h d'instrument au lieu d'une).</p>
      <p>Mais c'est mieux de s'en tenir au plan que de rusher pour rattraper.</p>`,
     [
@@ -399,6 +402,25 @@ function pauseDialog(h){
         if (to && to < from){ m.querySelector('#pErr').textContent = 'La date de fin est avant le début.'; return false; }
         h.pauses.push({from,to}); save(); render();
       }}
+    ]);
+}
+function deleteDialog(h){
+  const btns = [{label:'Annuler'}];
+  if (!h.archived) btns.push({label:'Archiver à la place', onClick:() => { h.archived = true; state.selected = null; save(); render(); }});
+  btns.push({label:'Supprimer', cls:'danger', onClick:() => { state.habits = state.habits.filter(x => x.id !== h.id); state.selected = null; save(); render(); }});
+  modal('Supprimer « ' + esc(h.name) + ' » ?',
+    '<p>Tout son historique sera perdu définitivement.</p>' + (h.archived ? '' :
+    '<p class="small">Vous pouvez aussi l\'archiver : elle disparaît de la liste, mais son historique est conservé et vous pourrez la restaurer.</p>'),
+    btns);
+}
+function settingsDialog(){
+  const last = state.lastBackup ? 'Dernière sauvegarde : ' + longDate(state.lastBackup) + '.' : 'Aucune sauvegarde pour l\'instant.';
+  modal('Réglages',
+    '<p class="small">Vos habitudes sont enregistrées uniquement sur cet appareil. Une sauvegarde permet de les retrouver si vous changez de téléphone ou si les données sont effacées.</p><p class="small">' + last + '</p>',
+    [
+      {label:'Fermer'},
+      {label:'Importer', onClick:() => { document.getElementById('file').click(); }},
+      {label:'Exporter', cls:'primary', onClick:() => { exportData(); render(); }}
     ]);
 }
 function applyJoker(h,d){
@@ -450,8 +472,7 @@ function renderList(){
   const h = current(), jb = document.getElementById('jokbox');
   if (h && !h.archived){
     const left = jokersLeft(h,T());
-    jb.innerHTML = `<button data-act="joker" ${jokerMode?'class="primary"':''}>🃏 Utiliser un joker</button>
-      <div class="small" style="margin-top:6px">${h.jokN ? `${left}/${h.jokN} restant${left>1?'s':''} (${jokPerLabel(h)}) pour « ${esc(h.name)} »` : `Aucun joker prévu pour « ${esc(h.name)} »`}</div>`;
+    jb.innerHTML = `<button class="ghost ${jokerMode?'on':''}" data-act="joker" title="Couvrir une séance manquée avec un joker">🃏 Joker${h.jokN ? ` · ${left}/${h.jokN} restant${left>1?'s':''}` : ''}</button>`;
   } else jb.innerHTML = '';
 }
 
@@ -469,33 +490,19 @@ function renderOverview(){
   const hs = state.habits.filter(h => !h.archived);
   if (!hs.length) return '';
   const tk = T();
-  const rows = hs.map(h => {
+  const cards = hs.map(h => {
     const s = simulate(h), i = periodInfo(h, keyOf(h,today())), st = statusToday(h);
-    const prog = i.required ? `<b>${i.done}/${i.required}</b> <span class="small">${h.period==='month'?'ce mois':'cette semaine'}</span>` : '<span class="small">—</span>';
+    const dots = i.required && i.required <= 7
+      ? `<div class="dots">${Array.from({length:i.required}, (_,k) => `<i style="${k < i.done ? `background:${h.color};border-color:${h.color}` : `border-color:${h.color}`}"></i>`).join('')}</div>`
+      : (i.required ? `<div class="small" style="margin-top:6px"><b>${i.done}/${i.required}</b></div>` : '');
     const btn = (!isPaused(h,tk) && sessionsOn(h,tk) === 0) ? `<button class="mini" data-act="quick" data-id="${h.id}">✓ Fait</button>` : '';
-    return `<tr>
-      <td><span class="dot" style="background:${h.color}"></span> <a class="lnk" data-act="select" data-id="${h.id}">${esc(h.name)}</a><div class="small">${esc(objectiveText(h))}</div></td>
-      <td>${prog}</td>
-      <td><b>🔥 ${s.current} j</b><div class="small">record ${s.best} j</div></td>
-      <td><span class="pill ${st.c}">${st.t}</span></td>
-      <td style="text-align:right">${btn}</td></tr>`;
+    return `<div class="oc" data-act="select" data-id="${h.id}" style="background:color-mix(in srgb,${h.color} 20%,var(--card))">
+      <div style="flex:1;min-width:0"><div class="on">${esc(h.name)}</div><div class="small">${esc(objectiveText(h))}</div>
+        <span class="pill ${st.c}" style="margin-top:6px;background:var(--card)">${st.t}</span>${dots}</div>
+      <div><div class="big">${s.current}</div><div class="small" style="text-align:center">jours</div></div>
+      ${btn}</div>`;
   }).join('');
-  return `<section class="card"><div class="head" style="margin-bottom:6px"><h2>Vue d'ensemble · ${esc(longDate(tk))}</h2></div>
-    <div class="scroll"><table class="otable">${rows}</table></div></section>`;
-}
-
-function heatmap(h){
-  const m = mondayOf(today()), tk = T(); let html = '';
-  for (let w=52; w>=0; w--) for (let i=0;i<7;i++){
-    const dd = addDays(m, -7*w+i), k = fmt(dd), n = sessionsOn(h,k);
-    let st = '';
-    if (k > tk) st = 'visibility:hidden';
-    else if (h.jok[k]) st = `background:color-mix(in srgb,${h.color} 35%,var(--line));outline:1px solid ${h.color}`;
-    else if (n > 0) st = `background:${h.color};opacity:${n>=2?1:.72}`;
-    else if (isPaused(h,k)) st = 'background:var(--faded);opacity:.4';
-    html += `<i style="${st}" title="${k}${n?` · ${n} séance${n>1?'s':''}`:''}"></i>`;
-  }
-  return `<div class="scroll"><div class="heat">${html}</div></div>`;
+  return `<section class="card"><div class="head" style="margin-bottom:10px"><h2>Vue d'ensemble · ${esc(longDate(tk))}</h2></div><div class="ocs">${cards}</div></section>`;
 }
 
 function renderDetail(){
@@ -533,7 +540,7 @@ function renderDetail(){
       if (future) cls.push('future');
       if (isPaused(h,key)) { cls.push('paused'); mk = mk || ''; }
       if (n > 0){ cls.push('done'); style = `background:${h.color};border-color:${h.color}`; mk = n>=2 ? '✓✓' : '✓'; }
-      else if (jk){ style = `background:color-mix(in srgb,${h.color} 28%,var(--card));border-color:${h.color}`; mk = '🃏'; title = 'Joker'; }
+      else if (jk){ style = `background:color-mix(in srgb,${h.color} 28%,var(--cell));border-color:${h.color}`; mk = '🃏'; title = 'Joker'; }
       if (dueMap[key]){
         if (key < tk){ cls.push('late'); bang = '<b class="bang late">!</b>'; title = 'Séance en retard'; }
         else { cls.push('due'); style += `;border-color:${h.color}`; title = key===tk ? 'À faire aujourd\'hui' : 'Séance prévue'; }
@@ -578,8 +585,8 @@ function renderDetail(){
         <div><h2>${esc(h.name)}</h2><div class="small">Objectif : ${h.days ? esc(h.days.map(i=>DAYS_LONG[i]).join(', ')) + ` (repos min. ${h.rest} j)` : `${h.target} fois par ${periodWord}`}</div></div></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         ${h.archived
-          ? `<button data-act="restore">Restaurer</button><button class="danger" data-act="del">Supprimer définitivement</button>`
-          : `<button data-act="edit">Modifier</button>${pa ? '' : '<button data-act="pause">⏸ Pause</button>'}<button data-act="archive">Archiver</button>`}
+          ? `<button data-act="restore">Restaurer</button><button class="danger" data-act="del">Supprimer</button>`
+          : `<button data-act="edit">Modifier</button>${pa ? '' : '<button data-act="pause">⏸ Pause</button>'}<button class="danger" data-act="del">Supprimer</button>`}
       </div>
     </div>
     <div class="stats">
@@ -607,8 +614,6 @@ function renderDetail(){
       <div class="stat"><div class="v">${rate}</div><div class="l">Objectifs atteints sur ~3 mois</div></div>
       <div class="stat"><div class="v">${topDay>=0 ? DAYS_LONG[topDay] : '—'}</div><div class="l">Jour où vous êtes le plus régulier${topDay>=0?` (${byDay[topDay]} séances)`:' (plus de données nécessaires)'}</div></div>
     </div>
-    <p class="small" style="margin:0 0 6px">Les 12 derniers mois — une case par jour (plus foncé = séance, 🃏 contour = joker) :</p>
-    ${heatmap(h)}
   </section>`;
 }
 
@@ -648,11 +653,7 @@ document.addEventListener('click', e => {
     case 'cancelPause': h.pauses.splice(Number(t.dataset.i),1); save(); render(); break;
     case 'archive': h.archived = true; state.selected = null; save(); render(); break;
     case 'restore': h.archived = false; save(); render(); break;
-    case 'del':
-      if (confirm(`Supprimer définitivement « ${h.name} » et tout son historique ?`)){
-        state.habits = state.habits.filter(x => x.id !== h.id); state.selected = null; save(); render();
-      }
-      break;
+    case 'del': deleteDialog(h); break;
     case 'joker': jokerMode = !jokerMode; render(); break;
     case 'jokerCancel': jokerMode = false; render(); break;
     case 'backup': exportData(); render(); break;
@@ -713,8 +714,7 @@ function exportData(){
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = 'habitudes-'+T()+'.json'; a.click(); URL.revokeObjectURL(a.href);
 }
-$('export').onclick = () => { exportData(); render(); };
-$('import').onclick = () => $('file').click();
+$('settings').onclick = () => settingsDialog();
 $('file').onchange = e => {
   const f = e.target.files[0]; if (!f) return;
   const r = new FileReader();
